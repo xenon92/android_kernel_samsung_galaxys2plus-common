@@ -28,6 +28,9 @@
 #include <linux/pwm/pwm.h>
 #include <linux/isa1000_vibrator.h>
 
+#include "tspdrv.h"
+
+
 //#include <alsa/asoundlib.h>
 
 #include "../staging/android/timed_output.h"
@@ -52,6 +55,7 @@ typedef struct
 static t_vib_desc vib_desc;
 static int controlset(const char *name, unsigned int *value, int index);
 static void vibrator_control(t_vib_desc *vib_iter, unsigned char onoff);
+
 
 
 #define MIN_TIMEOUT 150
@@ -85,7 +89,11 @@ void vibtonz_pwm(int nForce)
 	int pwm_period=0, pwm_duty = 0;
 
 	printk("%s : %d \n", __func__, nForce);
-	if( vib_iter->initialized == 0) return;
+	if( vib_iter->initialized == 0)
+	{
+		printk("vibtonz_pwm: vibrator not initialized");
+		return;
+	}
 
 	pwm_period = vib_iter->pwm_period;
 	pwm_duty = pwm_period/2 + ((pwm_period/2 - 2) *nForce) /127;
@@ -148,6 +156,11 @@ static void vibrator_enable_set_timeout(struct timed_output_dev *sdev, int timeo
 	printk(KERN_INFO "%s : Vibrator timeout = %d \n", __func__, valid_timeout);
 
 	mod_timer(&vib_iter->vib_timer, jiffies + msecs_to_jiffies(valid_timeout));
+
+	unlocked_ioctl(0, TSPDRV_ENABLE_AMP, 1);
+	vibtonz_pwm(valid_timeout);
+	unlocked_ioctl(0, TSPDRV_DISABLE_AMP, 0);
+
 }
 
 static void vibrator_off_work_func(struct work_struct *work)

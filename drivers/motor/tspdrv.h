@@ -104,7 +104,7 @@ typedef struct {
 #endif  /* __KERNEL__ */
 
 
-int regulator_hapticmotor_enabled;
-
+long unlocked_ioctl(struct file *file, unsigned int cmd,
+	unsigned long arg);
 
 #endif  /* _TSPDRV_H */
