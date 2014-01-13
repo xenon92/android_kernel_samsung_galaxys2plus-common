@@ -116,6 +116,8 @@ static int release(struct inode *inode, struct file *file);
 static ssize_t read(struct file *file, char *buf, size_t count, loff_t *ppos);
 static ssize_t write(struct file *file, const char *buf, size_t count,
 	loff_t *ppos);
+static long unlocked_ioctl(struct file *file, unsigned int cmd,
+	unsigned long arg);
 static const struct file_operations fops = {
 	.owner = THIS_MODULE,
 	.read = read,
@@ -477,7 +479,7 @@ static ssize_t write(struct file *file, const char *buf, size_t count,
 	return count;
 }
 
-long unlocked_ioctl(struct file *file, unsigned int cmd,
+static long unlocked_ioctl(struct file *file, unsigned int cmd,
 	unsigned long arg)
 {
 #ifdef QA_TEST
@@ -519,7 +521,6 @@ long unlocked_ioctl(struct file *file, unsigned int cmd,
 		break;
 
 	case TSPDRV_ENABLE_AMP:
-		printk("tspdrv: unlocked_ioctl : TSPDRV_ENABLE_AMP: %ld\n", arg);
 		wake_lock(&vib_wake_lock);
 		ImmVibeSPI_ForceOut_AmpEnable(arg);
 		DbgRecorderReset((arg));
@@ -543,8 +544,6 @@ long unlocked_ioctl(struct file *file, unsigned int cmd,
 
 	return 0;
 }
-
-EXPORT_SYMBOL(unlocked_ioctl);
 
 static int suspend(struct platform_device *pdev, pm_message_t state)
 {

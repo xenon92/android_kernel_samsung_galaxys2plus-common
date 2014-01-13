@@ -52,8 +52,6 @@ static bool g_bAmpEnabled;
 extern void vibtonz_en(bool en);
 extern void vibtonz_pwm(int nForce);
 
-int regulator_hapticmotor_enabled;
-
 /*
 ** Called to disable amp (disable output force)
 */
